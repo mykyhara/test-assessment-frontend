@@ -5,17 +5,18 @@ import { dirname, join } from 'node:path';
 const here = dirname(fileURLToPath(import.meta.url));
 const outFile = join(here, '..', 'public', 'venue.json');
 
-const SECTIONS_ACROSS = 5;
-const SECTIONS_DOWN = 4;
-const ROWS = 25;
-const COLS = 30;
-const SEAT_DX = 10;
-const SEAT_DY = 12;
-const SECTION_GAP = 60;
-const MARGIN = 40;
+const MARGIN = 60;
+const ROW_GAP = 11;
+const ELLIPSE_X = 1.3;
+const ELLIPSE_Y = 1;
+const AISLE_RATIO = 0.18;
+const TAU = Math.PI * 2;
 
-const sectionWidth = COLS * SEAT_DX;
-const sectionHeight = ROWS * SEAT_DY;
+const rings = [
+  { prefix: 'L', name: 'Lower', tier: 1, radius: 230, rows: 12, sections: 16, seatsPerRow: 20 },
+  { prefix: 'M', name: 'Middle', tier: 2, radius: 392, rows: 14, sections: 18, seatsPerRow: 20 },
+  { prefix: 'U', name: 'Upper', tier: 3, radius: 580, rows: 14, sections: 22, seatsPerRow: 20 },
+];
 
 let seed = 1337;
 const random = () => {
@@ -31,58 +32,64 @@ const pickStatus = () => {
   return 'held';
 };
 
-const letters = 'ABCDEFGHIJKLMNOPQRST';
+const outerRadius = Math.max(...rings.map((ring) => ring.radius + ring.rows * ROW_GAP));
+const cx = MARGIN + outerRadius * ELLIPSE_X;
+const cy = MARGIN + outerRadius * ELLIPSE_Y;
+
 const sections = [];
-let sectionIndex = 0;
+let seatCount = 0;
 
-for (let sr = 0; sr < SECTIONS_DOWN; sr += 1) {
-  for (let sc = 0; sc < SECTIONS_ACROSS; sc += 1) {
-    const id = letters[sectionIndex];
-    const tier = sr + 1;
+for (const ring of rings) {
+  const slot = TAU / ring.sections;
+  const span = slot * (1 - AISLE_RATIO);
+  for (let s = 0; s < ring.sections; s += 1) {
+    const id = `${ring.prefix}${s + 1}`;
+    const start = s * slot + (slot - span) / 2;
     const rows = [];
-
-    for (let r = 0; r < ROWS; r += 1) {
+    for (let r = 0; r < ring.rows; r += 1) {
+      const radius = ring.radius + r * ROW_GAP;
       const seats = [];
-      for (let c = 0; c < COLS; c += 1) {
-        const col = c + 1;
+      for (let c = 0; c < ring.seatsPerRow; c += 1) {
+        const angle = start + ((c + 0.5) / ring.seatsPerRow) * span;
         seats.push({
-          id: `${id}-${r + 1}-${String(col).padStart(2, '0')}`,
-          col,
-          x: c * SEAT_DX,
-          y: r * SEAT_DY,
-          priceTier: tier,
+          id: `${id}-${r + 1}-${String(c + 1).padStart(2, '0')}`,
+          col: c + 1,
+          x: cx + Math.cos(angle) * radius * ELLIPSE_X,
+          y: cy + Math.sin(angle) * radius * ELLIPSE_Y,
+          priceTier: ring.tier,
           status: pickStatus(),
         });
       }
       rows.push({ index: r + 1, seats });
+      seatCount += seats.length;
     }
-
     sections.push({
       id,
-      label: `Section ${id}`,
-      transform: {
-        x: MARGIN + sc * (sectionWidth + SECTION_GAP),
-        y: MARGIN + sr * (sectionHeight + SECTION_GAP),
-        scale: 1,
-      },
+      label: `${ring.name} ${s + 1}`,
+      transform: { x: 0, y: 0, scale: 1 },
       rows,
     });
-    sectionIndex += 1;
   }
 }
 
-const width = MARGIN * 2 + SECTIONS_ACROSS * sectionWidth + (SECTIONS_ACROSS - 1) * SECTION_GAP;
-const height = MARGIN * 2 + SECTIONS_DOWN * sectionHeight + (SECTIONS_DOWN - 1) * SECTION_GAP;
+const fieldHalfX = rings[0].radius * ELLIPSE_X * 0.72;
+const fieldHalfY = rings[0].radius * ELLIPSE_Y * 0.66;
 
 const venue = {
   venueId: 'arena-01',
   name: 'Metropolis Arena',
-  map: { width, height },
+  map: { width: Math.round(cx * 2), height: Math.round(cy * 2) },
+  stage: {
+    x: cx - fieldHalfX,
+    y: cy - fieldHalfY,
+    width: fieldHalfX * 2,
+    height: fieldHalfY * 2,
+    label: 'FIELD',
+  },
   sections,
 };
 
 mkdirSync(dirname(outFile), { recursive: true });
 writeFileSync(outFile, JSON.stringify(venue));
 
-const seatCount = SECTIONS_ACROSS * SECTIONS_DOWN * ROWS * COLS;
-console.log(`Wrote ${seatCount} seats to ${outFile} (map ${width}x${height})`);
+console.log(`Wrote ${seatCount} seats to ${outFile} (map ${venue.map.width}x${venue.map.height})`);

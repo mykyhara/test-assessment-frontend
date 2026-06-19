@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import type { PlacedSeat } from './types';
+import type { PlacedSeat, Stage } from './types';
 import { SeatNavigator, type Direction } from './navigation';
 import { drawScene, hitTest, screenToWorld, type Transform } from './render';
 
@@ -7,6 +7,7 @@ interface SeatingMapProps {
   seats: PlacedSeat[];
   mapWidth: number;
   mapHeight: number;
+  stage?: Stage;
   selectedSeats: PlacedSeat[];
   focusedSeat: PlacedSeat | null;
   heatmap: boolean;
@@ -37,6 +38,7 @@ export function SeatingMap({
   seats,
   mapWidth,
   mapHeight,
+  stage,
   selectedSeats,
   focusedSeat,
   heatmap,
@@ -71,6 +73,7 @@ export function SeatingMap({
         selectedSeats,
         focusedSeat,
         heatmap,
+        stage,
       });
     };
   });

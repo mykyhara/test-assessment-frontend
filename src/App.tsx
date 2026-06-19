@@ -58,6 +58,7 @@ export default function App() {
           seats={seats}
           mapWidth={venue.map.width}
           mapHeight={venue.map.height}
+          stage={venue.stage}
           selectedSeats={selectedSeats}
           focusedSeat={focusedSeat}
           heatmap={heatmap}

@@ -1,4 +1,4 @@
-import type { PlacedSeat, SeatStatus } from './types';
+import type { PlacedSeat, SeatStatus, Stage } from './types';
 
 export interface Transform {
   scale: number;
@@ -6,7 +6,8 @@ export interface Transform {
   offsetY: number;
 }
 
-export const SEAT_HALF = 3.5;
+export const SEAT_HALF = 3;
+const TAU = Math.PI * 2;
 
 export const STATUS_COLORS: Record<SeatStatus, string> = {
   available: '#2f9e44',
@@ -64,12 +65,17 @@ interface Scene {
   selectedSeats: PlacedSeat[];
   focusedSeat: PlacedSeat | null;
   heatmap: boolean;
+  stage?: Stage;
 }
 
 export function drawScene(scene: Scene): void {
   const { ctx, seats, transform, cssWidth, cssHeight, dpr, selectedSeats, focusedSeat, heatmap } =
     scene;
-  const size = SEAT_HALF * 2;
+  const margin = SEAT_HALF * 2;
+  const addCircle = (seat: PlacedSeat) => {
+    ctx.moveTo(seat.x + SEAT_HALF, seat.y);
+    ctx.arc(seat.x, seat.y, SEAT_HALF, 0, TAU);
+  };
 
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, cssWidth, cssHeight);
@@ -77,14 +83,25 @@ export function drawScene(scene: Scene): void {
   ctx.translate(transform.offsetX, transform.offsetY);
   ctx.scale(transform.scale, transform.scale);
 
+  if (scene.stage) {
+    const { x, y, width, height, label } = scene.stage;
+    ctx.fillStyle = '#343a40';
+    ctx.fillRect(x, y, width, height);
+    ctx.fillStyle = '#ced4da';
+    ctx.font = `bold ${Math.min(width, height) * 0.22}px system-ui, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(label, x + width / 2, y + height / 2);
+  }
+
   const bounds = visibleBounds(transform, cssWidth, cssHeight);
   const groups = new Map<string, PlacedSeat[]>();
   for (const seat of seats) {
     if (
-      seat.x < bounds.minX - size ||
-      seat.x > bounds.maxX + size ||
-      seat.y < bounds.minY - size ||
-      seat.y > bounds.maxY + size
+      seat.x < bounds.minX - margin ||
+      seat.x > bounds.maxX + margin ||
+      seat.y < bounds.minY - margin ||
+      seat.y > bounds.maxY + margin
     ) {
       continue;
     }
@@ -97,26 +114,23 @@ export function drawScene(scene: Scene): void {
   for (const [color, group] of groups) {
     ctx.fillStyle = color;
     ctx.beginPath();
-    for (const seat of group) ctx.rect(seat.x - SEAT_HALF, seat.y - SEAT_HALF, size, size);
+    for (const seat of group) addCircle(seat);
     ctx.fill();
   }
 
   if (selectedSeats.length > 0) {
     ctx.fillStyle = SELECTED_COLOR;
     ctx.beginPath();
-    for (const seat of selectedSeats) ctx.rect(seat.x - SEAT_HALF, seat.y - SEAT_HALF, size, size);
+    for (const seat of selectedSeats) addCircle(seat);
     ctx.fill();
   }
 
   if (focusedSeat) {
     ctx.lineWidth = 2 / transform.scale;
     ctx.strokeStyle = FOCUS_COLOR;
-    ctx.strokeRect(
-      focusedSeat.x - SEAT_HALF - 1,
-      focusedSeat.y - SEAT_HALF - 1,
-      size + 2,
-      size + 2,
-    );
+    ctx.beginPath();
+    ctx.arc(focusedSeat.x, focusedSeat.y, SEAT_HALF + 2, 0, TAU);
+    ctx.stroke();
   }
 
   ctx.restore();

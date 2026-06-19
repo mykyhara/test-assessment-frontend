@@ -21,10 +21,19 @@ export interface Section {
   rows: Row[];
 }
 
+export interface Stage {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  label: string;
+}
+
 export interface Venue {
   venueId: string;
   name: string;
   map: { width: number; height: number };
+  stage?: Stage;
   sections: Section[];
 }
 
