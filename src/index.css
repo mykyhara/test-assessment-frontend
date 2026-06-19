@@ -1,0 +1,283 @@
+:root {
+  --bg: #f8f9fa;
+  --surface: #ffffff;
+  --border: #dee2e6;
+  --text: #212529;
+  --muted: #868e96;
+  --accent: #1971c2;
+  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--sans);
+  color: var(--text);
+  background: var(--bg);
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.app__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1.25rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.app__header h1 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.app__header p {
+  margin: 0.1rem 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.app__main {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.seating-map {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  background: radial-gradient(circle at center, #ffffff 0%, #eef0f2 100%);
+}
+
+.seating-map__canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: grab;
+}
+
+.seating-map__canvas:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: -3px;
+}
+
+.seating-map__controls {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  display: flex;
+  gap: 0.35rem;
+}
+
+.seating-map__controls button {
+  min-width: 2.25rem;
+  height: 2.25rem;
+  padding: 0 0.6rem;
+  font-size: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.app__sidebar {
+  width: 320px;
+  flex-shrink: 0;
+  padding: 1rem;
+  overflow-y: auto;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.85rem;
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.legend__dot {
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 3px;
+}
+
+.panel h2,
+.summary__header h2 {
+  margin: 0 0 0.6rem;
+  font-size: 1rem;
+}
+
+.details {
+  margin: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.details div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.details dt {
+  color: var(--muted);
+}
+
+.details dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.details--empty {
+  color: var(--muted);
+  margin: 0;
+}
+
+.summary {
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+}
+
+.summary__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.summary__empty {
+  color: var(--muted);
+}
+
+.summary__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.summary__list li {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.summary__price {
+  font-variant-numeric: tabular-nums;
+}
+
+.summary__list button {
+  width: 1.6rem;
+  height: 1.6rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.summary__footer {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.summary__subtotal {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.05rem;
+}
+
+.summary__clear {
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.summary__clear:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.summary__note {
+  margin: 0.75rem 0 0;
+  color: #c2255c;
+  font-size: 0.85rem;
+}
+
+.state {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: var(--muted);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 768px) {
+  .app__main {
+    flex-direction: column;
+  }
+
+  .seating-map {
+    height: 60vh;
+    flex: none;
+  }
+
+  .app__sidebar {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid var(--border);
+  }
+}
