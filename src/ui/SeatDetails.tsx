@@ -1,9 +1,9 @@
-import type { PlacedSeat } from './types';
-import { formatPrice, STATUS_LABELS } from './format';
+import type { PlacedSeat } from '../venue/types';
+import { formatPrice, STATUS_LABELS } from '../venue/format';
 
 export function SeatDetails({ seat }: { seat: PlacedSeat | null }) {
   if (!seat) {
-    return <p className="details details--empty">Select a seat to see its details.</p>;
+    return <p className="details muted">Select a seat to see its details.</p>;
   }
 
   return (

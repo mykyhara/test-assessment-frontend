@@ -1,6 +1,6 @@
-import type { SeatStatus } from './types';
-import { STATUS_LABELS } from './format';
-import { SELECTED_COLOR, STATUS_COLORS, TIER_COLORS } from './render';
+import type { SeatStatus } from '../venue/types';
+import { STATUS_LABELS } from '../venue/format';
+import { SELECTED_COLOR, STATUS_COLORS, TIER_COLORS } from '../map/render';
 
 const STATUSES: SeatStatus[] = ['available', 'reserved', 'held', 'sold'];
 
@@ -13,13 +13,13 @@ export function Legend({ heatmap }: { heatmap: boolean }) {
     <ul className="legend" aria-label="Seat legend">
       {items.map((item) => (
         <li key={item.label}>
-          <span className="legend__dot" style={{ backgroundColor: item.color }} />
+          <span className="dot" style={{ backgroundColor: item.color }} />
           {item.label}
         </li>
       ))}
       {!heatmap && (
         <li>
-          <span className="legend__dot" style={{ backgroundColor: SELECTED_COLOR }} />
+          <span className="dot" style={{ backgroundColor: SELECTED_COLOR }} />
           Selected
         </li>
       )}

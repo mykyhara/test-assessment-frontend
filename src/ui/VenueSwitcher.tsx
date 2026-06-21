@@ -12,13 +12,9 @@ interface VenueSwitcherProps {
 
 export function VenueSwitcher({ venues, value, onChange }: VenueSwitcherProps) {
   return (
-    <fieldset className="venue-switcher">
-      <legend className="sr-only">Venue size</legend>
+    <div className="switcher" role="radiogroup" aria-label="Venue size">
       {venues.map((venue) => (
-        <label
-          key={venue.id}
-          className={`venue-switcher__option${venue.id === value ? ' is-active' : ''}`}
-        >
+        <label key={venue.id} className={venue.id === value ? 'active' : undefined}>
           <input
             type="radio"
             name="venue-size"
@@ -29,6 +25,6 @@ export function VenueSwitcher({ venues, value, onChange }: VenueSwitcherProps) {
           {venue.label}
         </label>
       ))}
-    </fieldset>
+    </div>
   );
 }

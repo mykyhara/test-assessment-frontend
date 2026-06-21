@@ -31,7 +31,7 @@ body {
   height: 100%;
 }
 
-.app__header {
+.header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -41,15 +41,22 @@ body {
   border-bottom: 1px solid var(--border);
 }
 
-.app__header h1 {
+.heading h1 {
   margin: 0;
   font-size: 1.15rem;
 }
 
-.app__header p {
+.heading p {
   margin: 0.1rem 0 0;
   color: var(--muted);
   font-size: 0.85rem;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .toggle {
@@ -60,14 +67,7 @@ body {
   cursor: pointer;
 }
 
-.app__controls {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.venue-switcher {
+.switcher {
   display: inline-flex;
   gap: 2px;
   margin: 0;
@@ -76,7 +76,7 @@ body {
   border-radius: 8px;
 }
 
-.venue-switcher__option {
+.switcher label {
   padding: 0.3rem 0.6rem;
   font-size: 0.85rem;
   font-variant-numeric: tabular-nums;
@@ -85,37 +85,42 @@ body {
   cursor: pointer;
 }
 
-.venue-switcher__option.is-active {
+.switcher label.active {
   background: var(--accent);
   color: #fff;
 }
 
-.venue-switcher__option input {
+.switcher input {
   position: absolute;
   opacity: 0;
   width: 0;
   height: 0;
 }
 
-.venue-switcher__option:focus-within {
+.switcher label:focus-within {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
 }
 
-.app__main {
+.main {
   display: flex;
   flex: 1;
   min-height: 0;
 }
 
-.seating-map {
+.main[aria-busy='true'] .canvas {
+  opacity: 0.55;
+  transition: opacity 0.15s ease;
+}
+
+.map {
   position: relative;
   flex: 1;
   min-width: 0;
   background: radial-gradient(circle at center, #ffffff 0%, #eef0f2 100%);
 }
 
-.seating-map__canvas {
+.canvas {
   display: block;
   width: 100%;
   height: 100%;
@@ -123,12 +128,12 @@ body {
   cursor: grab;
 }
 
-.seating-map__canvas:focus-visible {
+.canvas:focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: -3px;
 }
 
-.seating-map__controls {
+.zoom {
   position: absolute;
   top: 0.75rem;
   right: 0.75rem;
@@ -136,7 +141,7 @@ body {
   gap: 0.35rem;
 }
 
-.seating-map__controls button {
+.zoom button {
   min-width: 2.25rem;
   height: 2.25rem;
   padding: 0 0.6rem;
@@ -147,7 +152,23 @@ body {
   cursor: pointer;
 }
 
-.app__sidebar {
+.fps {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  font:
+    600 0.8rem/1 ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+  color: #fff;
+  background: rgba(33, 37, 41, 0.85);
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+.sidebar {
   width: 320px;
   flex-shrink: 0;
   padding: 1rem;
@@ -175,14 +196,14 @@ body {
   gap: 0.4rem;
 }
 
-.legend__dot {
+.dot {
   width: 0.85rem;
   height: 0.85rem;
   border-radius: 3px;
 }
 
 .panel h2,
-.summary__header h2 {
+.summary header h2 {
   margin: 0 0 0.6rem;
   font-size: 1rem;
 }
@@ -208,9 +229,9 @@ body {
   font-weight: 600;
 }
 
-.details--empty {
-  color: var(--muted);
+.muted {
   margin: 0;
+  color: var(--muted);
 }
 
 .summary {
@@ -218,17 +239,13 @@ body {
   padding-top: 1rem;
 }
 
-.summary__header {
+.summary header {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
 }
 
-.summary__empty {
-  color: var(--muted);
-}
-
-.summary__list {
+.tickets {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -236,7 +253,7 @@ body {
   gap: 0.5rem;
 }
 
-.summary__list li {
+.tickets li {
   display: grid;
   grid-template-columns: 1fr auto auto;
   align-items: center;
@@ -244,11 +261,11 @@ body {
   font-size: 0.9rem;
 }
 
-.summary__price {
+.price {
   font-variant-numeric: tabular-nums;
 }
 
-.summary__list button {
+.tickets button {
   width: 1.6rem;
   height: 1.6rem;
   border: 1px solid var(--border);
@@ -257,19 +274,19 @@ body {
   cursor: pointer;
 }
 
-.summary__footer {
+.summary footer {
   margin-top: 1rem;
   display: grid;
   gap: 0.6rem;
 }
 
-.summary__subtotal {
+.subtotal {
   display: flex;
   justify-content: space-between;
   font-size: 1.05rem;
 }
 
-.summary__clear {
+.clear {
   padding: 0.5rem;
   border: 1px solid var(--border);
   border-radius: 6px;
@@ -277,12 +294,12 @@ body {
   cursor: pointer;
 }
 
-.summary__clear:disabled {
+.clear:disabled {
   opacity: 0.5;
   cursor: default;
 }
 
-.summary__note {
+.note {
   margin: 0.75rem 0 0;
   color: #c2255c;
   font-size: 0.85rem;
@@ -308,16 +325,16 @@ body {
 }
 
 @media (max-width: 768px) {
-  .app__main {
+  .main {
     flex-direction: column;
   }
 
-  .seating-map {
+  .map {
     height: 60vh;
     flex: none;
   }
 
-  .app__sidebar {
+  .sidebar {
     width: 100%;
     border-left: none;
     border-top: 1px solid var(--border);

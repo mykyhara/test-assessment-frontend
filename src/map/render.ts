@@ -1,4 +1,4 @@
-import type { PlacedSeat, SeatStatus, Stage } from './types';
+import type { PlacedSeat, SeatStatus, Stage } from '../venue/types';
 
 export interface Transform {
   scale: number;
@@ -7,6 +7,7 @@ export interface Transform {
 }
 
 export const SEAT_HALF = 3;
+const SEAT_FILL = 0.85;
 const TAU = Math.PI * 2;
 
 export const STATUS_COLORS: Record<SeatStatus, string> = {
@@ -29,6 +30,20 @@ export function screenToWorld(px: number, py: number, t: Transform) {
   return { x: (px - t.offsetX) / t.scale, y: (py - t.offsetY) / t.scale };
 }
 
+export function fitTransform(
+  width: number,
+  height: number,
+  mapWidth: number,
+  mapHeight: number,
+): Transform {
+  const scale = Math.min(width / mapWidth, height / mapHeight) * 0.95;
+  return {
+    scale,
+    offsetX: (width - mapWidth * scale) / 2,
+    offsetY: (height - mapHeight * scale) / 2,
+  };
+}
+
 function visibleBounds(t: Transform, width: number, height: number) {
   return {
     minX: -t.offsetX / t.scale,
@@ -38,8 +53,28 @@ function visibleBounds(t: Transform, width: number, height: number) {
   };
 }
 
-export function hitTest(seats: PlacedSeat[], wx: number, wy: number): PlacedSeat | null {
-  const reach = SEAT_HALF * 2;
+// Markers have a fixed world radius, but the densest venues pack inner-row seats
+// closer than the default diameter; cap the radius at what the tightest row allows.
+export function fitSeatRadius(seats: PlacedSeat[]): number {
+  let minSpacing = Infinity;
+  for (let i = 1; i < seats.length; i++) {
+    const prev = seats[i - 1];
+    const seat = seats[i];
+    if (seat.sectionId !== prev.sectionId || seat.row !== prev.row) continue;
+    minSpacing = Math.min(minSpacing, Math.hypot(seat.x - prev.x, seat.y - prev.y));
+  }
+  return Number.isFinite(minSpacing)
+    ? Math.min(SEAT_HALF, (minSpacing / 2) * SEAT_FILL)
+    : SEAT_HALF;
+}
+
+export function hitTest(
+  seats: PlacedSeat[],
+  wx: number,
+  wy: number,
+  radius: number,
+): PlacedSeat | null {
+  const reach = radius * 2;
   let closest: PlacedSeat | null = null;
   let closestDistance = Infinity;
   for (const seat of seats) {
@@ -58,6 +93,7 @@ export function hitTest(seats: PlacedSeat[], wx: number, wy: number): PlacedSeat
 interface Scene {
   ctx: CanvasRenderingContext2D;
   seats: PlacedSeat[];
+  seatRadius: number;
   transform: Transform;
   cssWidth: number;
   cssHeight: number;
@@ -69,12 +105,22 @@ interface Scene {
 }
 
 export function drawScene(scene: Scene): void {
-  const { ctx, seats, transform, cssWidth, cssHeight, dpr, selectedSeats, focusedSeat, heatmap } =
-    scene;
-  const margin = SEAT_HALF * 2;
+  const {
+    ctx,
+    seats,
+    seatRadius,
+    transform,
+    cssWidth,
+    cssHeight,
+    dpr,
+    selectedSeats,
+    focusedSeat,
+    heatmap,
+  } = scene;
+  const margin = seatRadius * 2;
   const addCircle = (seat: PlacedSeat) => {
-    ctx.moveTo(seat.x + SEAT_HALF, seat.y);
-    ctx.arc(seat.x, seat.y, SEAT_HALF, 0, TAU);
+    ctx.moveTo(seat.x + seatRadius, seat.y);
+    ctx.arc(seat.x, seat.y, seatRadius, 0, TAU);
   };
 
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -129,7 +175,7 @@ export function drawScene(scene: Scene): void {
     ctx.lineWidth = 2 / transform.scale;
     ctx.strokeStyle = FOCUS_COLOR;
     ctx.beginPath();
-    ctx.arc(focusedSeat.x, focusedSeat.y, SEAT_HALF + 2, 0, TAU);
+    ctx.arc(focusedSeat.x, focusedSeat.y, seatRadius + 2, 0, TAU);
     ctx.stroke();
   }
 

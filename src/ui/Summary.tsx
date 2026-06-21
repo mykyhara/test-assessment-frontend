@@ -1,6 +1,6 @@
-import type { PlacedSeat } from './types';
-import { MAX_SEATS } from './selection';
-import { formatPrice } from './format';
+import type { PlacedSeat } from '../venue/types';
+import { MAX_SEATS } from '../selection/selection';
+import { formatPrice } from '../venue/format';
 
 interface SummaryProps {
   seats: PlacedSeat[];
@@ -14,7 +14,7 @@ export function Summary({ seats, onRemove, onClear, isFull }: SummaryProps) {
 
   return (
     <section className="summary" aria-label="Selected seats">
-      <header className="summary__header">
+      <header>
         <h2>Your seats</h2>
         <span>
           {seats.length} / {MAX_SEATS}
@@ -22,19 +22,19 @@ export function Summary({ seats, onRemove, onClear, isFull }: SummaryProps) {
       </header>
 
       {seats.length === 0 ? (
-        <p className="summary__empty">Pick up to {MAX_SEATS} available seats to get started.</p>
+        <p className="muted">Pick up to {MAX_SEATS} available seats to get started.</p>
       ) : (
-        <ul className="summary__list">
+        <ul className="tickets">
           {seats.map((seat) => (
             <li key={seat.id}>
               <span>
                 {seat.sectionLabel} · Row {seat.row} · Seat {seat.col}
               </span>
-              <span className="summary__price">{formatPrice(seat.price)}</span>
+              <span className="price">{formatPrice(seat.price)}</span>
               <button
                 type="button"
                 onClick={() => onRemove(seat)}
-                aria-label={`Remove seat ${seat.id}`}
+                aria-label={`Remove ${seat.sectionLabel}, row ${seat.row}, seat ${seat.col}`}
               >
                 ×
               </button>
@@ -43,23 +43,18 @@ export function Summary({ seats, onRemove, onClear, isFull }: SummaryProps) {
         </ul>
       )}
 
-      <footer className="summary__footer">
-        <div className="summary__subtotal">
+      <footer>
+        <div className="subtotal">
           <span>Subtotal</span>
           <strong>{formatPrice(subtotal)}</strong>
         </div>
-        <button
-          type="button"
-          className="summary__clear"
-          onClick={onClear}
-          disabled={seats.length === 0}
-        >
+        <button type="button" className="clear" onClick={onClear} disabled={seats.length === 0}>
           Clear all
         </button>
       </footer>
 
       {isFull && (
-        <p className="summary__note" role="status">
+        <p className="note" role="status">
           You have reached the {MAX_SEATS}-seat limit.
         </p>
       )}

@@ -5,10 +5,27 @@ const DEFAULT_PRICE = 60;
 
 export const priceForTier = (tier: number) => PRICE_BY_TIER[tier] ?? DEFAULT_PRICE;
 
-export async function loadVenue(url = '/venue.json'): Promise<Venue> {
+export const countSeats = (venue: Venue) =>
+  venue.sections.reduce(
+    (total, section) => total + section.rows.reduce((rows, row) => rows + row.seats.length, 0),
+    0,
+  );
+
+async function loadVenue(url: string): Promise<Venue> {
   const response = await fetch(url);
   if (!response.ok) throw new Error(`Failed to load venue (${response.status})`);
   return response.json();
+}
+
+const requests = new Map<string, Promise<Venue>>();
+
+export function getVenue(url: string): Promise<Venue> {
+  let request = requests.get(url);
+  if (!request) {
+    request = loadVenue(url);
+    requests.set(url, request);
+  }
+  return request;
 }
 
 export function placeSeats(venue: Venue): PlacedSeat[] {
