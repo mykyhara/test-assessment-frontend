@@ -6,19 +6,43 @@ import { SeatingMap } from './SeatingMap';
 import { SeatDetails } from './SeatDetails';
 import { Summary } from './Summary';
 import { Legend } from './Legend';
+import { VenueSwitcher, type VenueOption } from './VenueSwitcher';
 import { formatPrice, STATUS_LABELS } from './format';
 
+const VENUES: VenueOption[] = [
+  { id: '1k', label: '1k', file: '/venues/arena-1k.json' },
+  { id: '2k', label: '2k', file: '/venues/arena-2k.json' },
+  { id: '5k', label: '5k', file: '/venues/arena-5k.json' },
+  { id: '10k', label: '10k', file: '/venues/arena-10k.json' },
+  { id: '15k', label: '15k', file: '/venue.json' },
+];
+
 export default function App() {
+  const [venueId, setVenueId] = useState('5k');
   const [venue, setVenue] = useState<Venue | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [focusedId, setFocusedId] = useState<string | null>(null);
   const [heatmap, setHeatmap] = useState(false);
 
+  const venueFile = VENUES.find((option) => option.id === venueId)!.file;
+
   useEffect(() => {
-    loadVenue().then(setVenue, (reason: unknown) =>
-      setError(reason instanceof Error ? reason.message : 'Unknown error'),
+    let active = true;
+    loadVenue(venueFile).then(
+      (loaded) => {
+        if (!active) return;
+        setVenue(loaded);
+        setError(null);
+        setFocusedId(null);
+      },
+      (reason: unknown) => {
+        if (active) setError(reason instanceof Error ? reason.message : 'Unknown error');
+      },
     );
-  }, []);
+    return () => {
+      active = false;
+    };
+  }, [venueFile]);
 
   const seats = useMemo(() => (venue ? placeSeats(venue) : []), [venue]);
   const seatsById = useMemo(() => new Map(seats.map((seat) => [seat.id, seat])), [seats]);
@@ -43,14 +67,17 @@ export default function App() {
           <h1>{venue.name}</h1>
           <p>{seats.length.toLocaleString()} seats</p>
         </div>
-        <label className="toggle">
-          <input
-            type="checkbox"
-            checked={heatmap}
-            onChange={(event) => setHeatmap(event.target.checked)}
-          />
-          Price heat-map
-        </label>
+        <div className="app__controls">
+          <VenueSwitcher venues={VENUES} value={venueId} onChange={setVenueId} />
+          <label className="toggle">
+            <input
+              type="checkbox"
+              checked={heatmap}
+              onChange={(event) => setHeatmap(event.target.checked)}
+            />
+            Price heat-map
+          </label>
+        </div>
       </header>
 
       <main className="app__main">

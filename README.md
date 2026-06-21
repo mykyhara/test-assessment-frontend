@@ -9,7 +9,7 @@ pnpm install
 pnpm dev
 ```
 
-The app loads `public/venue.json` on startup. A 15,000-seat venue is committed so the app runs at scale out of the box; run `pnpm generate-venue` to regenerate it.
+Five datasets (1k–15k seats) are committed, with a size switcher in the header so you can watch performance hold up as the seat count grows. The 15k set is `public/venue.json`; the rest live under `public/venues/`. Run `pnpm generate-venue` to regenerate them all.
 
 ```bash
 pnpm lint        # ESLint

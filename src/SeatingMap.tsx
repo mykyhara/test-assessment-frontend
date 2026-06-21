@@ -119,6 +119,14 @@ export function SeatingMap({
   }, [fitToView, scheduleDraw]);
 
   useEffect(() => {
+    fittedRef.current = false;
+    if (sizeRef.current.width && sizeRef.current.height) {
+      fittedRef.current = true;
+      fitToView();
+    }
+  }, [fitToView]);
+
+  useEffect(() => {
     scheduleDraw();
   });
 
