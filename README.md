@@ -1,3 +1,10 @@
+# Short Intro
+Hi Muhammad,
+Thanks for the challenge — really enjoyed it! I've put my full solution together in a Notion doc here:
+https://brief-capacity-b5e.notion.site/Mykyta-Harashchenko-Developer-Challenge-aiseo-384bdef5963f80c58ca1e475dce15724
+
+---
+
 # Interactive Event Seating Map: Front-End Technical Assessment
 
 Technical assessment showcasing an interactive event seating map built with the React + TypeScript stack. Seats are clickable and keyboard-navigable, show their details on selection, and you can pick up to eight seats with a live subtotal that survives a page reload. The brief asks for smooth rendering of arenas up to ~15,000 seats, which drives most of the design below.
