@@ -2,3 +2,4 @@ dist
 coverage
 public/venue.json
 pnpm-lock.yaml
+README.md
